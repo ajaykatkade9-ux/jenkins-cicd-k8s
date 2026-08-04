@@ -23,17 +23,6 @@ pipeline {
                 }
             }
         }
-        
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh '''
-                kubectl set image deployment/jenkins-cicd-demo \
-                jenkins-cicd-demo=ajaykatkade9/jenkins-cicd-demo:v1
-
-                kubectl rollout status deployment/jenkins-cicd-demo
-                '''
-            }
-         }  
 
         stage('Docker Login') {
             steps {
@@ -52,11 +41,20 @@ pipeline {
                 sh 'docker push $IMAGE_NAME'
             }
         }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                kubectl set image deployment/jenkins-cicd-demo node-app=$IMAGE_NAME
+                kubectl rollout status deployment/jenkins-cicd-demo
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'Docker image pushed successfully!'
+            echo 'Pipeline completed successfully!'
         }
 
         failure {
