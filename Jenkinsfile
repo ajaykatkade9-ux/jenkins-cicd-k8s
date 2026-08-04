@@ -1,13 +1,11 @@
 pipeline {
     agent any
 
-    stages {
+    environment {
+        IMAGE_NAME = "ajaykatkade9/jenkins-cicd-demo:v1"
+    }
 
-        stage('Git Checkout') {
-            steps {
-                echo 'Source code downloaded from GitHub'
-            }
-        }
+    stages {
 
         stage('Check Tools') {
             steps {
@@ -21,24 +19,33 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir('app') {
-                    sh 'docker build -t jenkins-cicd-demo:v1 .'
+                    sh 'docker build -t $IMAGE_NAME .'
                 }
             }
         }
 
-        stage('Run Docker Container') {
+        stage('Docker Login') {
             steps {
-                sh '''
-                docker rm -f jenkins-demo || true
-                docker run -d --name jenkins-demo -p 3000:3000 jenkins-cicd-demo:v1
-                '''
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                }
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                sh 'docker push $IMAGE_NAME'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo 'Docker image pushed successfully!'
         }
 
         failure {
