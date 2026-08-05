@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "ajaykatkade9/jenkins-cicd-demo:v1"
+        IMAGE_NAME = "ajaykatkade9/jenkins-cicd-demo:${BUILD_NUMBER}"
     }
 
     stages {
