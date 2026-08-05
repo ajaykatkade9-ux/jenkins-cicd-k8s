@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jenkins-cicd-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: jenkins.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jenkins-cicd-service
+            port:
+              number: 80
